@@ -1,3 +1,11 @@
+"""PaliGemma For Conditional Generation
+
+This model is a conditional generation model that uses a vision encoder and a language model to generate text.
+It is used to generate text from an image.
+
+The code is annotated with Google-style docstrings and type hints.
+"""
+
 import torch
 from torch import nn
 from typing import Optional, Tuple, List
@@ -60,5 +68,4 @@ class PaliGemmaForConditionalGeneration(nn.Module):
         Returns:
             Tensor of shape [batch_size, sequence_length, vocab_size]
         """
-        vision_output = self.vision_tower(pixel_values)
-        multi_modal_output = self.multi_modal_projector(vision_output)
+        

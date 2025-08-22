@@ -4,6 +4,8 @@ Provides a `PaligemmaProcessor` that prepares text and image inputs for
 vision-language models, including adding image tokens to prompts and
 preprocessing images. Functions are documented with Google-style docstrings
 and type hints.
+
+The code is annotated with Google-style docstrings and type hints.
 """
 
 from typing import Dict, List, Optional, Union, Tuple, Iterable, Any
