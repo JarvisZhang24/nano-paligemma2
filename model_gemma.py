@@ -70,7 +70,9 @@ class PaliGemmaForConditionalGeneration(nn.Module):
         # Set pad token ID
         self.pad_token_id = config.pad_token_id if config.pad_token_id is not None else -1
 	
-    
+    def tie_weights(self):
+        return self.language_model.tie_weights()
+
     def forward(
         self,
         pixel_values: Optional[torch.FloatTensor] = None,

@@ -459,6 +459,7 @@ def process_images(
     ]
 
     # Step 2: Convert PIL Images to numpy arrays (HWC format)
+    # [height, width, channels]
     numpy_images = [np.array(image) for image in resized_images]
 
     # Step 3: Optional rescaling of pixel values
