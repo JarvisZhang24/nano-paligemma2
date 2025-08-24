@@ -1,6 +1,5 @@
 from typing import Optional
 
-
 class SiglipVisionConfig:
     """Configuration class for SIGLIP Vision Transformer hyperparameters.
 

@@ -194,7 +194,46 @@ class PaliGemmaForConditionalGeneration(nn.Module):
 
         #### CREATE THE ATTENTION MASK ####
 
+        # Create the attention mask
+        dtype, device = input_embeds.dtype, input_embeds.device
+        min_dtype = torch.finfo(dtype).min
+        q_len = input_embeds.shape[1]
+
+        # If we are in the prefill phase, we do not mask any token, because we're in the prefill phase
+        # This only works when we have no padding
+        if kv_cache is None or kv_cache.num_items() == 0:
+            # Do not mask any token, because we're in the prefill phase
+            # This only works when we have no padding
+            causal_mask = torch.full(
+                (batch_size, q_len, q_len), fill_value=0, dtype=dtype, device=device
+            )
+        else:
+            # Since we are generating tokens, the query must be one single token
+            assert q_len == 1
+            kv_len = kv_cache.num_items() + q_len
+            # Also in this case we don't need to mask anything, since each query should be able to attend all previous tokens. 
+            # This only works when we have no padding
+            causal_mask = torch.full(
+                (batch_size, q_len, kv_len), fill_value=0, dtype=dtype, device=device
+            )
+
+        # Add the head dimension
+        # [Batch_Size, Q_Len, KV_Len] -> [Batch_Size, Num_Heads_Q, Q_Len, KV_Len]
+        causal_mask = causal_mask.unsqueeze(1)
         
+        # If we are generating tokens, we need to create the position ids
+        if kv_cache is not None and kv_cache.num_items() > 0:
+            # The position of the query is just the last position
+            # [0, 1,2,3,4,... 255 , 256 ,257] 0~255 : image tokens, 256 : text tokens, 257 : \n token
+            position_ids = attention_mask.cumsum(-1)[:, -1]
+            if position_ids.dim() == 1:
+                position_ids = position_ids.unsqueeze(0)
+        else:
+            # Create a position_ids based on the size of the attention_mask
+            # For masked tokens, use the number 1 as position.
+            # [Batch_Size, Seq_Len] -> [Batch_Size, Seq_Len]
+            position_ids = (attention_mask.cumsum(-1)).masked_fill_((attention_mask == 0), 1).to(device)
+
         return final_embedding, causal_mask, position_ids
 
     def forward(
