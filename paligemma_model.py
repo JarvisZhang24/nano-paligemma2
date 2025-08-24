@@ -20,7 +20,7 @@ from torch import nn
 from typing import Optional, Tuple
 
 from vision_encoder import SiglipVisionModel
-from paligemma_config import PaliGemmaConfig
+from config import PaliGemmaConfig, SiglipVisionConfig, GemmaConfig
 from gemma_model import GemmaForCausalLM
 
 

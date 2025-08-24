@@ -29,7 +29,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 
-from paligemma_config import SiglipVisionConfig
+from config import SiglipVisionConfig
 from attention import SiglipAttention
 
 
