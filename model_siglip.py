@@ -29,76 +29,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 
-
-class SiglipVisionConfig:
-    """Configuration class for SIGLIP Vision Transformer hyperparameters.
-
-    This class encapsulates all the configuration parameters needed to initialize
-    and train a SIGLIP vision transformer model. The parameters control various
-    aspects of the model architecture including embedding dimensions, attention
-    mechanisms, and regularization.
-
-    Attributes:
-        hidden_size: Dimensionality of hidden states throughout the encoder.
-        intermediate_size: Size of the intermediate layer in MLP blocks.
-        num_hidden_layers: Number of transformer encoder layers.
-        num_attention_heads: Number of attention heads in multi-head attention.
-        num_channels: Number of input image channels (typically 3 for RGB).
-        image_size: Input image height and width (assumed square).
-        patch_size: Size of patches for patch embedding (height and width).
-        layer_norm_eps: Epsilon value for layer normalization stability.
-        attention_dropout: Dropout probability for attention weights.
-        num_image_tokens: Optional precomputed number of image tokens.
-
-    Example:
-        >>> config = SiglipVisionConfig(
-        ...     hidden_size=768,
-        ...     num_hidden_layers=12,
-        ...     num_attention_heads=12
-        ... )
-    """
-
-    def __init__(
-        self,
-        hidden_size: int = 768,
-        intermediate_size: int = 3072,
-        num_hidden_layers: int = 12,
-        num_attention_heads: int = 12,
-        num_channels: int = 3,
-        image_size: int = 224,
-        patch_size: int = 16,
-        layer_norm_eps: float = 1e-6,
-        attention_dropout: float = 0.0,
-        num_image_tokens: Optional[int] = None,
-        **kwargs
-    ) -> None:
-        """Initialize SiglipVisionConfig.
-
-        Args:
-            hidden_size: Dimension of the hidden states of the encoder.
-            intermediate_size: Dimension of the MLP inside each encoder layer.
-            num_hidden_layers: Number of transformer layers in the encoder.
-            num_attention_heads: Number of attention heads.
-            num_channels: Number of input image channels.
-            image_size: Input image spatial size (assumes square input).
-            patch_size: Patch size used by the patch embedding convolution.
-            layer_norm_eps: Epsilon used in layer normalization.
-            attention_dropout: Dropout probability applied to attention weights.
-            num_image_tokens: Optional number of image tokens if precomputed.
-            **kwargs: Additional unused keyword arguments for forward compatibility.
-        """
-        super().__init__()
-
-        self.hidden_size = hidden_size
-        self.intermediate_size = intermediate_size
-        self.num_hidden_layers = num_hidden_layers
-        self.num_attention_heads = num_attention_heads
-        self.num_channels = num_channels
-        self.patch_size = patch_size
-        self.image_size = image_size
-        self.attention_dropout = attention_dropout
-        self.layer_norm_eps = layer_norm_eps
-        self.num_image_tokens = num_image_tokens
+from paligemma_config import SiglipVisionConfig
 
 
 class SiglipVisionEmbeddings(nn.Module):

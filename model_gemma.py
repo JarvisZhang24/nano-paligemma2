@@ -20,8 +20,9 @@ from torch import nn
 from typing import Optional, Tuple, List, Dict, Any
 from torch.nn import CrossEntropyLoss
 import math
-from model_siglip import SiglipVisionConfig, SiglipVisionModel
 
+from model_siglip import SiglipVisionConfig, SiglipVisionModel
+from paligemma_config import PaliGemmaConfig, GemmaConfig
 
 class PaliGemmaForConditionalGeneration(nn.Module):
     """PaliGemma model for conditional generation from images and text.
@@ -73,6 +74,19 @@ class PaliGemmaForConditionalGeneration(nn.Module):
     def tie_weights(self):
         return self.language_model.tie_weights()
 
+
+    def _merge_input_ids_with_image_features(self, image_features, input_embeds, input_ids, attention_mask, kv_cache):
+        """Merge image features with text embeddings.
+        
+        Args:
+            image_features: Image features.
+            input_embeds: Text embeddings.
+            input_ids: Input IDs.
+            attention_mask: Attention mask.
+            kv_cache: Key-value cache.
+        """
+        return image_features, input_embeds, input_ids, attention_mask, kv_cache
+
     def forward(
         self,
         pixel_values: Optional[torch.FloatTensor] = None,
@@ -108,14 +122,16 @@ class PaliGemmaForConditionalGeneration(nn.Module):
             assert torch.all(attention_mask == 1), "attention_mask must contain only 1s"
 
         # Step 1: Extract text embeddings from input tokens
-        # Convert token IDs to embeddings: [batch_size, seq_len, hidden_size]
+        # Convert token IDs to embeddings: 
+        # [batch_size, seq_len] -> [batch_size, seq_len, 2048]
         input_embeds = self.language_model.get_input_embeddings()(input_ids)
 
         # Step 2: Extract and project image features
-        # Process image through vision tower: [batch_size, 3, H, W] -> [batch_size, 196, 768]
+        # Process image through vision tower: [batch_size, 3, H, W] -> [batch_size, num_patches, 768]
         image_embeds = self.vision_tower(pixel_values.to(input_embeds.dtype))
 
-        # Project visual features to text embedding space: [batch_size, 196, 768] -> [batch_size, 196, 2048]
+        # Project visual features to text embedding space: 
+        # [batch_size, num_patches, 768] -> [batch_size, num_patches, 2048]
         image_features = self.multi_modal_projector(image_embeds)
 
         # Merge image features with text embeddings
@@ -124,7 +140,8 @@ class PaliGemmaForConditionalGeneration(nn.Module):
         )
 
         # Step 3: Generate output through language model
-        # Pass merged features through language model: [batch_size, 392, 768] -> [batch_size, 392, vocab_size]
+        # Pass merged features through language model: 
+        # [batch_size, 392, 2048] -> [batch_size, 392, vocab_size]
         outputs = self.language_model(
             attention_mask=attention_mask,
             position_ids=position_ids,
