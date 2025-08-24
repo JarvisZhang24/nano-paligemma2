@@ -17,12 +17,33 @@ The code is annotated with Google-style docstrings and type hints.
 
 import torch
 from torch import nn
-from typing import Optional, Tuple, List, Dict, Any
-from torch.nn import CrossEntropyLoss
-import math
+from typing import Optional, Tuple
 
-from model_siglip import SiglipVisionConfig, SiglipVisionModel
-from paligemma_config import PaliGemmaConfig, GemmaConfig
+from vision_encoder import SiglipVisionModel
+from paligemma_config import PaliGemmaConfig
+from gemma_model import GemmaForCausalLM
+
+
+class PaliGemmaMultiModalProjector(nn.Module):
+    '''
+    This class implements the multi-modal projector for the PaliGemma model.
+    It projects the image features to the text embedding space.
+    '''
+
+    def __init__(self, config: PaliGemmaConfig) -> None:
+        '''
+        Initialize the multi-modal projector.
+
+        Args:
+            config: PaliGemmaConfig containing model parameters.
+        '''
+        super().__init__()
+        self.linear = nn.Linear(config.vision_config.hidden_size, config.vision_config.projection_dim, bias=True)
+
+    def forward(self, image_features):
+        # [Batch_Size, Num_Patches, Embed_Dim] -> [Batch_Size, Num_Patches, Projection_Dim]
+        hidden_states = self.linear(image_features)
+        return hidden_states
 
 class PaliGemmaForConditionalGeneration(nn.Module):
     """PaliGemma model for conditional generation from images and text.
@@ -45,6 +66,12 @@ class PaliGemmaForConditionalGeneration(nn.Module):
         language_model: Gemma language model for text generation.
         vocab_size: Size of the vocabulary.
         pad_token_id: ID of the padding token.
+
+    Example:
+        >>> config = PaliGemmaConfig()
+        >>> model = PaliGemmaForConditionalGeneration(config)
+        >>> outputs = model(pixel_values=pixel_values, input_ids=input_ids)
+        
     """
 
     def __init__(self, config: PaliGemmaConfig) -> None:

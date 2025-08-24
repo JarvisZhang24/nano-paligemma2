@@ -1,5 +1,5 @@
-from model_siglip import SiglipVisionConfig
-from typing import Optional, Dict, Any
+from typing import Optional
+
 
 class SiglipVisionConfig:
     """Configuration class for SIGLIP Vision Transformer hyperparameters.

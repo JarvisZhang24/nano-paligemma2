@@ -2,7 +2,7 @@ from typing import Optional, Tuple
 import torch
 import torch.nn as nn
 
-from model_siglip import SiglipVisionConfig
+from paligemma_config import SiglipVisionConfig
 
 '''
 This class implements the multi-head self-attention mechanism for the SIGLIP Vision Transformer.
