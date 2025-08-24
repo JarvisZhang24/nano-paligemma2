@@ -75,7 +75,14 @@ class PaliGemmaForConditionalGeneration(nn.Module):
         return self.language_model.tie_weights()
 
 
-    def _merge_input_ids_with_image_features(self, image_features, input_embeds, input_ids, attention_mask, kv_cache):
+    def _merge_input_ids_with_image_features(
+        self,
+        image_features: torch.Tensor,
+        input_embeds: torch.Tensor,
+        input_ids: torch.Tensor,
+        attention_mask: Optional[torch.Tensor] = None,
+        kv_cache: Optional[KVCache] = None,
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """Merge image features with text embeddings.
         
         Args:
@@ -84,8 +91,84 @@ class PaliGemmaForConditionalGeneration(nn.Module):
             input_ids: Input IDs.
             attention_mask: Attention mask.
             kv_cache: Key-value cache.
+
+        Returns:
+            final_embedding: Merged embeddings.
+            causal_mask: Causal mask.
+            position_ids: Position IDs.
         """
-        return image_features, input_embeds, input_ids, attention_mask, kv_cache
+        # Get the shape of the image features and the input embeddings
+        # [batch_size, num_patches, embed_dim]
+        _, _, embed_dim = image_features.shape
+
+        # Get the shape of the input embeddings
+        # [batch_size, seq_len]
+        batch_size, sequence_length = input_ids.shape
+        
+        # Get the dtype and device of the input embeddings
+        dtype, device = input_embeds.dtype, input_embeds.device
+        
+        # Scale the image features by the square root of the hidden size
+        # Shape: [batch_size, num_patches, embed_dim]
+        scaled_image_features = image_features / (self.config.hidden_size**0.5)
+
+        # Combine the embeddings of the image tokens, the text tokens and mask out all the padding tokens.
+        # Shape: [batch_size, seq_len, embed_dim]
+        final_embedding = torch.zeros(
+            batch_size, sequence_length, embed_dim, dtype=input_embeds.dtype, device=input_embeds.device
+        )
+
+        '''
+        Suppose we have a sequence of tokens ids: [567, 567, 567, 567, 567, 1, 56, 67, 89, 11, 2]
+        where 567 is the image token, 1 is the padding token and 56, 67, 89, 11 are text tokens, 2 is the \n token.
+
+        We want to merge the image features with the text features and mask out all the padding tokens.
+
+        We can do this by creating a mask that is True for the text tokens and False for the image tokens and padding tokens.
+
+        We can then use this mask to merge the image features with the text features.
+
+        '''
+
+        # Text tokens are the ones that are not image tokens and not padding tokens
+        # Shape: [Batch_Size, Seq_Len]. True for text tokens
+        # [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1]
+        text_mask = (input_ids != self.config.image_token_index) & (input_ids != self.pad_token_id)
+
+        # Image tokens are the ones that are image tokens
+        # Shape: [Batch_Size, Seq_Len]. True for image tokens
+        # [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0]
+        image_mask = input_ids == self.config.image_token_index
+
+        # Padding tokens are the ones that are padding tokens ,but we don't use them in the final embedding.
+        # Shape: [Batch_Size, Seq_Len]. True for padding tokens
+        # [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        pad_mask = input_ids == self.pad_token_id
+
+        # We need to expand the masks to the embedding dimension otherwise we can't use them in torch.where
+        # Shape: [Batch_Size, Seq_Len, Embed_Dim]. True for text tokens
+        text_mask_expanded = text_mask.unsqueeze(-1).expand(-1, -1, embed_dim)
+        # Shape: [Batch_Size, Seq_Len, Embed_Dim]. True for padding tokens
+        pad_mask_expanded = pad_mask.unsqueeze(-1).expand(-1, -1, embed_dim)
+        # Shape: [Batch_Size, Seq_Len, Embed_Dim]. True for image tokens
+        image_mask_expanded = image_mask.unsqueeze(-1).expand(-1, -1, embed_dim)
+
+        # Combine the embeddings of the image tokens, the text tokens and mask out all the padding tokens.
+        # Shape: [batch_size, seq_len, embed_dim]
+        final_embedding = torch.where(text_mask_expanded, input_embeds, final_embedding)
+
+        # Mask out the image tokens
+        # Shape: [batch_size, seq_len, embed_dim]
+        final_embedding = final_embedding.masked_scatter(image_mask_expanded, scaled_image_features)
+
+        # Mask out the padding tokens
+        # Shape: [batch_size, seq_len, embed_dim]
+        final_embedding = torch.where(pad_mask_expanded, torch.zeros_like(final_embedding), final_embedding)
+
+        #### CREATE THE ATTENTION MASK ####
+
+        
+        return final_embedding, causal_mask, position_ids
 
     def forward(
         self,

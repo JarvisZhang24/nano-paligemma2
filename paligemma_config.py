@@ -111,22 +111,30 @@ class GemmaConfig():
         )
     '''
 
-
-
     def __init__(
         self,
+        # Vocab size
         vocab_size,
+        # Hidden size
         hidden_size,
+        # Intermediate size
         intermediate_size,
+        # Number of hidden layers
         num_hidden_layers,
+        # Number of attention heads
         num_attention_heads,
+        # Number of key value heads
         num_key_value_heads,
         head_dim=256,
         max_position_embeddings=8192,
+        # RMS norm eps
         rms_norm_eps=1e-6,
         rope_theta=10000.0,
+        # Attention bias
         attention_bias=False,
+        # Attention dropout
         attention_dropout=0.0,
+        # Pad token id
         pad_token_id=None,
         **kwargs,
     ):
