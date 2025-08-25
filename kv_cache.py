@@ -17,9 +17,17 @@ class KVCache():
         key_cache (List[torch.Tensor]): The list of key tensors.
         value_cache (List[torch.Tensor]): The list of value tensors. 
         num_items (int): The number of items in the KVCache.
+
+    Example:
+        >>> kv_cache = KVCache()
+        >>> key_states = torch.randn(1, 2, 6, 4)
+        >>> value_states = torch.randn(1, 2, 6, 4)
+        >>> 
     """
 
     def __init__(self) -> None:
+
+        # Create the key and value buffers for the KVCache
         self.key_cache: List[torch.Tensor] = []
         self.value_cache: List[torch.Tensor] = []
     
@@ -42,13 +50,14 @@ class KVCache():
         """
         Update the KVCache with the new key and value states.
         """
+        # If we never added anything to the KV-Cache of this layer, let's create it.
         if len(self.key_cache) <= layer_idx:
             # If we never added anything to the KV-Cache of this layer, let's create it.
             self.key_cache.append(key_states)
             self.value_cache.append(value_states)
         else:
             # ... otherwise we concatenate the new keys with the existing ones.
-            # each tensor has shape: [Batch_Size, Num_Heads_KV, Seq_Len, Head_Dim]
+            # Add the new key and value states to the existing key and value states along the sequence length dimension
             self.key_cache[layer_idx] = torch.cat([self.key_cache[layer_idx], key_states], dim=-2)
             self.value_cache[layer_idx] = torch.cat([self.value_cache[layer_idx], value_states], dim=-2)
 
