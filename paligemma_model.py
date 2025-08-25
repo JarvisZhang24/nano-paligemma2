@@ -22,6 +22,7 @@ from typing import Optional, Tuple
 from vision_encoder import SiglipVisionModel
 from config import PaliGemmaConfig, SiglipVisionConfig, GemmaConfig
 from gemma_model import GemmaForCausalLM
+from kv_cache import KVCache
 
 
 class PaliGemmaMultiModalProjector(nn.Module):

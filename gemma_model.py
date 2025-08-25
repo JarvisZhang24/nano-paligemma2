@@ -12,10 +12,16 @@ from kv_cache import KVCache
 
 
 class GemmaModel(nn.Module):
-    """
-    This class implements the Gemma model, which is a causal language model that uses the Gemma model.
-    It is used to generate text from a given input text.
+    '''
+    This class implements the GemmaModel
+    Given the input embeddings, it passes them through the decoder layers and returns the hidden states.
     
+    input_embeds: [Batch_Size, Seq_Len, Hidden_Size]
+    -> GemmaDecoderLayer * num_layers # [Batch_Size, Seq_Len, Hidden_Size]
+    -> GemmaRMSNorm # [Batch_Size, Seq_Len, Hidden_Size]
+    Outputs: 
+    -> hidden_states  #[Batch_Size, Seq_Len, Hidden_Size]
+
     Args:
         config (GemmaConfig): The configuration of the Gemma model.
 
@@ -26,7 +32,20 @@ class GemmaModel(nn.Module):
         embed_tokens (nn.Embedding): The embedding layer to project the input ids to the hidden size.
         layers (nn.ModuleList): The list of decoder layers of the model.
         norm (GemmaRMSNorm): The normalization layer of the model.
-    """
+
+    Methods:
+        get_input_embeds(self) -> torch.Tensor: Get the input embeddings for the input ids.
+        forward(self, attention_mask: Optional[torch.Tensor] = None, position_ids: Optional[torch.LongTensor] = None, inputs_embeds: Optional[torch.FloatTensor] = None, kv_cache: Optional[KVCache] = None) -> torch.FloatTensor: Forward pass of the GemmaModel.
+
+    Example:
+        >>> config = GemmaConfig()
+        >>> model = GemmaModel(config)
+        >>> inputs_embeds = model.get_input_embeds() # [Batch_Size, Seq_Len, Hidden_Size]
+        >>> outputs = model(inputs_embeds=inputs_embeds) # [Batch_Size, Seq_Len, Hidden_Size]
+        >>> print(outputs.shape) # [Batch_Size, Seq_Len, Hidden_Size]
+    
+    '''
+
     def __init__(self, config: GemmaConfig):
         """
         Initialize the GemmaModel.
@@ -42,7 +61,47 @@ class GemmaModel(nn.Module):
             [GemmaDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
         )
         self.norm = GemmaRMSNorm(config.hidden_size, eps=config.rms_norm_eps)
-    
+
+    def get_input_embeds(self) -> torch.Tensor:
+        """
+        Get the input embeddings for the input ids.
+        """
+        return self.embed_tokens
+
+    def forward(
+        self,
+        attention_mask: Optional[torch.Tensor] = None,
+        position_ids: Optional[torch.LongTensor] = None,
+        inputs_embeds: Optional[torch.FloatTensor] = None,
+        kv_cache: Optional[KVCache] = None,
+    ) -> torch.FloatTensor:
+        """
+        Forward pass of the GemmaModel.
+        """
+        # [Batch_Size, Seq_Len, Hidden_Size]
+        hidden_states = inputs_embeds
+        # [Batch_Size, Seq_Len, Hidden_Size]
+        normalizer = torch.tensor(self.config.hidden_size**0.5, dtype=hidden_states.dtype)
+        # Normalize the hidden states
+        hidden_states = hidden_states * normalizer
+
+        for decoder_layer in self.layers:
+            # Pass the hidden states through the decoder layer
+            # [Batch_Size, Seq_Len, Hidden_Size]
+            hidden_states = decoder_layer(
+                hidden_states,
+                attention_mask=attention_mask,
+                position_ids=position_ids,
+                kv_cache=kv_cache,
+            )
+
+        # [Batch_Size, Seq_Len, Hidden_Size]
+        hidden_states = self.norm(hidden_states)
+
+        # Return the hidden states
+        # [Batch_Size, Seq_Len, Hidden_Size]
+        return hidden_states
+
 
 
 class GemmaForCausalLM(nn.Module):
@@ -58,6 +117,22 @@ class GemmaForCausalLM(nn.Module):
         model (GemmaModel): The Gemma model.
         vocab_size (int): The vocabulary size of the model.
         lm_head (nn.Linear): The linear layer to project the hidden states to the vocabulary size.
+
+    Example:
+        >>> config = GemmaConfig()
+        >>> model = GemmaForCausalLM(config)
+        >>> inputs_embeds = model.get_input_embeds() # [Batch_Size, Seq_Len, Hidden_Size]
+        >>> outputs = model(inputs_embeds=inputs_embeds) # [Batch_Size, Seq_Len, Hidden_Size]
+        >>> print(outputs.shape) # [Batch_Size, Seq_Len, Hidden_Size]
+        >>> print(outputs["logits"].shape) # [Batch_Size, Seq_Len, Vocab_Size]
+        >>> print(outputs["kv_cache"].shape) # [Batch_Size, Seq_Len, Hidden_Size]
+
+        input_embeds: [Batch_Size, Seq_Len, Hidden_Size]
+        -> GemmaModel # [Batch_Size, Seq_Len, Hidden_Size]
+        -> lm_head # [Batch_Size, Seq_Len, Vocab_Size]
+        Outputs:
+        -> logits: [Batch_Size, Seq_Len, Vocab_Size]
+        -> kv_cache: [Batch_Size, Seq_Len, Hidden_Size] (if kv_cache is not None)
     """
     def __init__(self, config: GemmaConfig):
         super().__init__()

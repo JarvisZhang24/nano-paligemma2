@@ -27,7 +27,7 @@ Example:
 '''
 
 # Set the model path
-MODEL_PATH="$HOME/projects/paligemma-weights/paligemma-3b-pt-224"
+MODEL_PATH="$HOME/paligemma-weights/paligemma-3b-pt-224"
 
 # Set the prompt
 PROMPT="this building is "
