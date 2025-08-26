@@ -27,13 +27,13 @@ Example:
 '''
 
 # Set the model path
-MODEL_PATH="$HOME/paligemma-weights/paligemma-3b-pt-224"
+MODEL_PATH="./paligemma-3b-pt-224/"
 
 # Set the prompt
-PROMPT="this building is "
+PROMPT="Describe the image: "
 
 # Set the image file path
-IMAGE_FILE_PATH="test_images/pic1.jpeg"
+IMAGE_FILE_PATH="./test_images/home.jpg"
 
 # Set the maximum tokens to generate
 MAX_TOKENS_TO_GENERATE=100
