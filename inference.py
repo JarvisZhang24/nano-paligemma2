@@ -165,12 +165,18 @@ def main():
     # 交互模式
     else:
         print("\n=== Interactive Mode ===")
-        print("Type 'exit' to quit, '/image <path>' to change image")
-        print(f"Current image: {args.image}\n")
-        print(f"Current temperature: {args.temperature}")
-        print(f"Current top_p: {args.top_p}")
-        print("Type 'describe' to describe the image")
-        print("Type 'detect' to detect objects in the image")
+        print("Commands:")
+        print("  exit                    - Quit the program")
+        print("  /image <path>          - Change image")
+        print("  /temperature <value>   - Set temperature (0.1-2.0)")
+        print("  /top_p <value>         - Set top_p (0.1-1.0)")
+        print("  /help                  - Show this help")
+        print("  describe               - Describe the current image")
+        print("  detect <object>        - Detect objects in image")
+        print(f"\nCurrent settings:")
+        print(f"  Image: {args.image}")
+        print(f"  Temperature: {args.temperature}")
+        print(f"  Top_p: {args.top_p}\n")
         
         current_image = args.image
         
@@ -189,9 +195,30 @@ def main():
                 if user_input.startswith("/temperature "):
                     args.temperature = float(user_input[13:].strip())
                     print(f"Temperature changed to: {args.temperature}\n")
+                    continue
                 if user_input.startswith("/top_p "):
                     args.top_p = float(user_input[7:].strip())
                     print(f"Top_p changed to: {args.top_p}\n")
+                    continue
+                
+                if user_input.lower() == "/help":
+                    print("\nCommands:")
+                    print("  exit                    - Quit the program")
+                    print("  /image <path>          - Change image")
+                    print("  /temperature <value>   - Set temperature (0.1-2.0)")
+                    print("  /top_p <value>         - Set top_p (0.1-1.0)")
+                    print("  /help                  - Show this help")
+                    print("  describe               - Describe the current image")
+                    print("  detect <object>        - Detect objects in image")
+                    print(f"\nCurrent settings:")
+                    print(f"  Image: {current_image}")
+                    print(f"  Temperature: {args.temperature}")
+                    print(f"  Top_p: {args.top_p}\n")
+                    continue
+                
+                # Skip empty input
+                if not user_input:
+                    continue
 
                 # 自动检测是否为检测prompt
                 is_detection = "detect" in user_input.lower()
