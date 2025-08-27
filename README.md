@@ -45,8 +45,8 @@ python inference.py
 ### Quick Start
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/PaliGemma-Vision-Language-Model.git
-cd PaliGemma-Vision-Language-Model
+git clone https://github.com/jarviszhang24/nano-paligemma2.git
+cd nano-paligemma2
 
 # Create conda environment
 conda create -n paligemma python=3.9
@@ -109,7 +109,7 @@ engine = SimpleInference()
 engine.generate(
     image_path="examples/car.png",
     prompt="describe this image",
-    max_tokens=100,
+    max_tokens=1024,
     temperature=0.8
 )
 
@@ -146,9 +146,8 @@ PaliGemma-Vision-Language-Model/
 
 | Device | Tokens/sec | Memory Usage |
 |--------|------------|--------------|
-| RTX 4090 | ~15-20 | 8GB VRAM |
-| Apple M2 Pro | ~4-6 | 8GB RAM |
-| CPU (Intel i7) | ~1-2 | 16GB RAM |
+| Apple M4 Pro | ~4-6 | 8GB RAM |
+
 
 *Benchmarked on PaliGemma2-3B model with 224px images*
 
@@ -187,9 +186,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact
 
-Your Name - your.email@example.com
-
-Project Link: [https://github.com/yourusername/PaliGemma-Vision-Language-Model](https://github.com/yourusername/PaliGemma-Vision-Language-Model)
 
 ---
 
