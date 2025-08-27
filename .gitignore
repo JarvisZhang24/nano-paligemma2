@@ -4,4 +4,4 @@ __pycache__/
 paligemma2-3b-mix-224/
 
 examples/
-.DS_Store
+*.DS_Store
