@@ -1,3 +1,7 @@
 __pycache__/
 
 *.env
+paligemma2-3b-mix-224/
+
+examples/
+.DS_Store
