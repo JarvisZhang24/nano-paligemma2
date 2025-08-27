@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Simplified PaliGemma Inference Script
-专注于核心推理功能，移除了冗余的验证和下载逻辑
+Focus on core inference functionality, removing redundant validation and download logic
 """
 
 import torch
@@ -49,19 +49,25 @@ def load_model(model_path="paligemma2-3b-mix-224", device="auto"):
     
     return model, processor, device
 
-
+def print_current_settings(image_path, temperature, top_p):
+    print("\n=== Current Settings ===")
+    print(f"Image: {image_path}")
+    print(f"Temperature: {temperature}")
+    print(f"Top_p: {top_p}")
+    print("=== Current Settings ===\n")
+    
 class SimpleInference:
-    """简化的推理引擎"""
+    """Simple Inference Engine"""
     
     def __init__(self, model_path="paligemma2-3b-mix-224", device="auto"):
         self.model, self.processor, self.device = load_model(model_path, device)
     
     def generate(self, image_path, prompt, max_tokens=1024, temperature=0.8, top_p=0.9, detection=False):
-        """生成响应"""
-        # 加载图像
+        """Generate response"""
+        # Load image
         image = Image.open(image_path)
         
-        # 准备输入
+        # Prepare input
         model_inputs = self.processor(text=[prompt], images=[image])
         model_inputs = {k: v.to(self.device) for k, v in model_inputs.items()}
         
@@ -69,7 +75,7 @@ class SimpleInference:
         attention_mask = model_inputs["attention_mask"]
         pixel_values = model_inputs["pixel_values"]
         
-        # 生成文本
+        # Generate text
         kv_cache = KVCache()
         stop_token = self.processor.tokenizer.eos_token_id
         generated_tokens = []
@@ -81,7 +87,7 @@ class SimpleInference:
         
         with torch.no_grad():
             for _ in range(max_tokens):
-                # 前向传播
+                # Forward pass
                 outputs = self.model(
                     input_ids=input_ids,
                     pixel_values=pixel_values,
@@ -92,48 +98,48 @@ class SimpleInference:
                 kv_cache = outputs["kv_cache"]
                 next_token_logits = outputs["logits"][:, -1, :]
                 
-                # 采样
+                # Sampling
                 next_token_logits = torch.softmax(next_token_logits / temperature, dim=-1)
                 next_token = sample_top_p(next_token_logits, top_p)
                 next_token = next_token.squeeze(0)
                 generated_tokens.append(next_token)
                 
-                # 解码并打印
+                # Decoding and printing
                 decoded_token = self.processor.tokenizer.decode(
                     next_token.item(), skip_special_tokens=False
                 )
                 print(decoded_token, end="", flush=True)
                 
-                # 检查停止标记
+                # Check stop token
                 if next_token.item() == stop_token:
                     break
                 
-                # 更新输入
+                # Update input
                 input_ids = next_token.unsqueeze(-1)
                 attention_mask = torch.cat(
                     [attention_mask, torch.ones((1, 1), device=self.device)], dim=-1
                 )
         
-        # 统计信息
+        # Statistics
         elapsed = time.time() - start_time
         token_count = len(generated_tokens)
         print(f"\n[Stats] {token_count} tokens in {elapsed:.2f}s ({token_count/elapsed:.1f} tokens/s)\n")
         
-        # 检测可视化处理
+        # Detection visualization
         if detection and "detect" in prompt.lower() and generated_tokens:
-            # 将token转换为文本进行检测可视化
+            # Convert token to text for detection visualization
             token_ids = [token.item() for token in generated_tokens]
             decoded = self.processor.tokenizer.decode(token_ids, skip_special_tokens=False)
             print(f"[Detection] Showing detection results...")
             print(f"[Detection] Decoded output: {decoded}")
             display_detection(decoded, image_path)
         
-        # 返回完整生成的文本（可选）
-        return None  # 已经在生成过程中打印了输出
+        # Return full generated text (optional)
+        return None  # Already printing output during generation
 
 
 def main():
-    """主函数 - 交互式或单次推理"""
+    """Main function - Interactive or single inference"""
     import argparse
     
     parser = argparse.ArgumentParser(description="Simple PaliGemma Inference")
@@ -148,11 +154,11 @@ def main():
     
     args = parser.parse_args()
     
-    # 初始化推理引擎
+    # Initialize inference engine
     print("Initializing PaliGemma 2 Vision Language Model...")
     engine = SimpleInference(args.model, args.device)
     
-    # 单次推理模式
+    # Single inference mode
     if args.prompt:
         engine.generate(
             args.image, 
@@ -162,7 +168,7 @@ def main():
             args.top_p,
             args.detection
         )
-    # 交互模式
+    # Interactive mode
     else:
         print("\n=== Interactive Mode ===")
         print("Commands:")
@@ -172,11 +178,8 @@ def main():
         print("  /top_p <value>         - Set top_p (0.1-1.0)")
         print("  /help                  - Show this help")
         print("  describe               - Describe the current image")
-        print("  detect <object>        - Detect objects in image")
-        print(f"\nCurrent settings:")
-        print(f"  Image: {args.image}")
-        print(f"  Temperature: {args.temperature}")
-        print(f"  Top_p: {args.top_p}\n")
+        print("  detect <object>        - Detect objects in image")       
+        print_current_settings(args.image, args.temperature, args.top_p)
         
         current_image = args.image
         
@@ -190,15 +193,18 @@ def main():
                 if user_input.startswith("/image "):
                     current_image = user_input[7:].strip()
                     print(f"Image changed to: {current_image}\n")
+                    print_current_settings(current_image, args.temperature, args.top_p)
                     continue
-                # 更新参数
+                # Update parameters
                 if user_input.startswith("/temperature "):
                     args.temperature = float(user_input[13:].strip())
                     print(f"Temperature changed to: {args.temperature}\n")
+                    print_current_settings(current_image, args.temperature, args.top_p)
                     continue
                 if user_input.startswith("/top_p "):
                     args.top_p = float(user_input[7:].strip())
                     print(f"Top_p changed to: {args.top_p}\n")
+                    print_current_settings(current_image, args.temperature, args.top_p)
                     continue
                 
                 if user_input.lower() == "/help":
@@ -210,17 +216,14 @@ def main():
                     print("  /help                  - Show this help")
                     print("  describe               - Describe the current image")
                     print("  detect <object>        - Detect objects in image")
-                    print(f"\nCurrent settings:")
-                    print(f"  Image: {current_image}")
-                    print(f"  Temperature: {args.temperature}")
-                    print(f"  Top_p: {args.top_p}\n")
+                    print_current_settings(current_image, args.temperature, args.top_p)
                     continue
                 
                 # Skip empty input
                 if not user_input:
                     continue
 
-                # 自动检测是否为检测prompt
+                # Automatically detect if it's a detection prompt
                 is_detection = "detect" in user_input.lower()
 
                 engine.generate(

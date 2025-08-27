@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-PaliGemma 精简版CLI - 专注于推理
+PaliGemma CLI
 """
 
 import sys
@@ -15,7 +15,7 @@ from inference import SimpleInference
 
 
 def create_parser():
-    """创建参数解析器"""
+    """Create argument parser"""
     parser = argparse.ArgumentParser(
         description="PaliGemma Vision Language Model",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -27,20 +27,20 @@ Examples:
         """
     )
     
-    # 子命令
+    # Subcommands
     subparsers = parser.add_subparsers(dest='command', help='Commands')
     
-    # describe命令 - 描述图像
+    # describe command - Describe an image
     describe_parser = subparsers.add_parser('describe', help='Describe an image')
     describe_parser.add_argument('image', help='Image file path')
     describe_parser.add_argument('--detail', action='store_true', help='Detailed description')
     
-    # detect命令 - 物体检测
+    # detect command - Object detection
     detect_parser = subparsers.add_parser('detect', help='Detect objects in image')
     detect_parser.add_argument('image', help='Image file path')
     detect_parser.add_argument('object', help='Object to detect')
     
-    # 通用参数（用于直接调用）
+    # Common parameters (for direct inference)
     parser.add_argument('-i', '--image', type=str, help='Image file path')
     parser.add_argument('-p', '--prompt', type=str, help='Text prompt')
     parser.add_argument('--model', type=str, default='paligemma2-3b-mix-224', help='Model path')
@@ -52,7 +52,7 @@ Examples:
 
 
 def handle_describe(args, engine):
-    """处理描述命令"""
+    """Handle describe command"""
     if args.detail:
         prompt = "Describe this image in detail, including colors, objects, composition and atmosphere"
     else:
@@ -62,13 +62,13 @@ def handle_describe(args, engine):
 
 
 def handle_detect(args, engine):
-    """处理检测命令"""
+    """Handle detect command"""
     print(f"Running object detection...")
     print(f"Looking for: {args.object}")
     
     prompt = f"detect {args.object}"
     
-    # 直接使用简化的推理引擎，启用检测可视化
+    # Use simplified inference engine with detection visualization
     engine.generate(args.image, prompt, max_tokens=1024, detection=True)
     
     return 0
@@ -76,11 +76,11 @@ def handle_detect(args, engine):
 
 
 def main():
-    """主函数"""
+    """Main function"""
     parser = create_parser()
     args = parser.parse_args()
     
-    # 初始化模型（延迟加载）
+    # Initialize model (lazy loading)
     engine = None
     
     def get_engine():
@@ -91,14 +91,14 @@ def main():
             print("Model loaded! ✅\n")
         return engine
     
-    # 处理子命令
+    # Handle subcommands
     if args.command == 'describe':
         handle_describe(args, get_engine())
     
     elif args.command == 'detect':
         handle_detect(args, get_engine())
     
-    # 处理直接推理（使用-i和-p参数）
+    # Handle direct inference (using -i and -p parameters)
     elif args.image and args.prompt:
         get_engine().generate(
             args.image,

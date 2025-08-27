@@ -2,6 +2,7 @@ import time
 import cv2
 import re
 import numpy as np
+from pathlib import Path
 
 ################################### Detection ###################################
 
@@ -13,6 +14,7 @@ import numpy as np
 # To convert x values to coordinate, use the following formula: value * image_width / 1024
 # To convert y values to coordinate, use the following formula: value * image_height / 1024
 
+PROJECT_ROOT = Path(__file__).parent
 
 def display_detection(decoded, image_file_path):
     image = cv2.imread(image_file_path)
@@ -62,6 +64,6 @@ def display_detection(decoded, image_file_path):
     cv2.destroyAllWindows()
 
     # Save the image
-    cv2.imwrite(f"/Users/jarviszhang/CV_Project/PaliGemma Vision Language Model/examples/output_image_{time.time()}.jpg", image)
-    print(f"Image saved to examples/output_image_{time.time()}.jpg")
+    cv2.imwrite(f"{PROJECT_ROOT}/examples/output_image_{time.time()}.jpg", image)
+    print(f"Image saved to {PROJECT_ROOT}/examples/output_image_{time.time()}.jpg")
 
