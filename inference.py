@@ -20,10 +20,10 @@ from src.generation import sample_top_p
 from src.detection import display_detection
 
 def load_model(model_path="paligemma2-3b-mix-224", device="auto"):
-    """加载模型的简化版本"""
+    """Load model"""
     from scripts.download_weights import load_weights
     
-    # 自动选择设备
+    # Auto select device
     if device == "auto":
         if torch.cuda.is_available():
             device = "cuda"
@@ -35,11 +35,11 @@ def load_model(model_path="paligemma2-3b-mix-224", device="auto"):
     print(f"Loading model from: {model_path}")
     print(f"Using device: {device}")
     
-    # 加载模型 - 默认使用paligemma2
+    # Load model - default to paligemma2
     model, tokenizer = load_weights(model_path, "paligemma2", device)
     model = model.to(device).eval()
     
-    # 初始化处理器
+    # Initialize processor
     vision_config = model.config.vision_config
     processor = PaliGemmaProcessor(
         tokenizer,
@@ -173,7 +173,7 @@ def main():
         print("\n=== Interactive Mode ===")
         print("Commands:")
         print("  exit                    - Quit the program")
-        print("  /image <path>          - Change image")
+        print("  /image <path>           - Change image")
         print("  /temperature <value>   - Set temperature (0.1-2.0)")
         print("  /top_p <value>         - Set top_p (0.1-1.0)")
         print("  /help                  - Show this help")

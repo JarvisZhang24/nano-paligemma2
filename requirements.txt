@@ -1,12 +1,23 @@
 # python packages
-numpy
-pillow
-safetensors
-tokenizers
-torch
-torchaudio
-torchvision
-tqdm
-transformers
-python-dotenv
-huggingface-hub
+# Core dependencies
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+transformers>=4.35.0
+tokenizers>=0.14.0
+safetensors>=0.4.0
+
+# Image processing
+pillow>=10.0.0
+opencv-python>=4.8.0
+numpy>=1.24.0
+
+# Utilities
+tqdm>=4.65.0
+python-dotenv>=1.0.0
+huggingface-hub>=0.17.0
+
+# Optional: For enhanced performance
+# accelerate>=0.24.0
+# bitsandbytes>=0.41.0
+psutil>=5.9.0
