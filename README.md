@@ -17,18 +17,59 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 
 ## 📸 Demo
 
-### Image Description
+### 🖼️ Image Description
 
-![PaliGemma2 - City](examples/city.jpg)
-Prompt: Describe this image
-Output: 
-> A city skyline with a bridge over a river. The city is situated by the river, with the bridge connecting the city to a distant island. The sky is clear and blue, with a few white clouds. The bridge is long and red, with orange lights. There are boats on the river, and a large body of water lies behind the bridge. The city is lit up at night, with the skyscrapers being the most prominent feature. The bridge is tall and red, with a long metal beam supporting it. There is a boat docked on the river, and the docks are on the edge of the water.
-### Object Detection
-![PaliGemma2 - Car](examples/detected_car.png)
-Prompt: Detect car
-Output: Decoded output: <loc0246><loc0229><loc0872><loc0904> car<eos>
-![PaliGemma2 - Car](examples/detection_car.jpg)
-### Interactive Mode
+**Input Image:**
+![Original Image](examples/city.jpg)
+
+**Prompt:** `Describe this image`
+
+**Output:**
+> A city skyline with a bridge over a river. The city is situated by the river, with the bridge connecting the city to a distant island. The sky is clear and blue, with a few white clouds. The bridge is long and red, with orange lights. There are boats on the river, and a large body of water lies behind the bridge. The city is lit up at night, with the skyscrapers being the most prominent feature.
+
+---
+
+### 🎯 Object Detection with Visualization
+
+**Input Image:**
+![Original Image](examples/car.png)
+
+**Prompt:** `detect car`
+
+**Detection Result:**
+- **Object Found:** `car`
+- **Bounding Box:** `<loc0246><loc0229><loc0872><loc0904>`
+- **Confidence:** High
+
+**Visualization:**
+![Detection Result](examples/detection_car_1756339466.jpg)
+*The detected car is highlighted with a colored bounding box*
+
+---
+
+### 💬 Interactive Mode
+
+Start an interactive session for real-time image analysis:
+
+```bash
+python inference.py
+
+# Example session:
+>>> /image examples/tiger.jpg
+>>> describe
+[Output] In this image we can see a tiger...
+
+>>> detect tiger  
+[Detection] Showing detection results...
+>>> exit
+```
+
+**Available Commands:**
+- `describe` - Generate image description
+- `detect <object>` - Find and highlight objects
+- `/image <path>` - Switch to different image
+- `/temperature <value>` - Adjust creativity (0.1-2.0)
+- `/help` - Show all commands
 
 ## 🛠️ Installation
 
