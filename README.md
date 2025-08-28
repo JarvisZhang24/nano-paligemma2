@@ -126,6 +126,29 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 ![Detection](examples/detection_parrots_1756340105.jpg)
 *Detected with bounding box*
 
+<tr>
+<td width="33%">
+
+**Input**
+![Lake](examples/lake.jpg)
+*Original Image*
+
+</td>
+<td width="33%">
+
+**Detection**
+`detect pier`
+
+**Result:**
+`<loc0520><loc0531><loc1022><loc0896> pier<eos>`
+
+</td>
+<td width="33%">
+
+**Output**
+![Detection](examples/detection_lake_1756340795.jpg)
+*Detected with bounding box*
+
 </td>
 </tr>
 </table>
