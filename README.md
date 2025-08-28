@@ -56,7 +56,7 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 
 **Visualization:**
 ![Detection Result](examples/detection_car_1756339466.jpg)
-*The detected car is highlighted with a colored bounding box*
+---
 
 **Input Image:**
 ![Original Image](examples/parrots.png)
@@ -68,7 +68,6 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 
 **Visualization:**
 ![Detection Result](examples/detection_parrots_1756340105.jpg)
-*The detected parrot is highlighted with a colored bounding box*
 
 ---
 
