@@ -26,6 +26,7 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 
 **Output:**
 > A city skyline with a bridge over a river. The city is situated by the river, with the bridge connecting the city to a distant island. The sky is clear and blue, with a few white clouds. The bridge is long and red, with orange lights. There are boats on the river, and a large body of water lies behind the bridge. The city is lit up at night, with the skyscrapers being the most prominent feature.
+---
 
 ![Original Image](examples/parrots.png)
 
