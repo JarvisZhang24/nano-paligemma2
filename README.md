@@ -22,11 +22,25 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 **Input Image:**
 ![Original Image](examples/city.jpg)
 
-**Prompt:** `Describe this image`
+**Prompt:** `describe`
 
 **Output:**
 > A city skyline with a bridge over a river. The city is situated by the river, with the bridge connecting the city to a distant island. The sky is clear and blue, with a few white clouds. The bridge is long and red, with orange lights. There are boats on the river, and a large body of water lies behind the bridge. The city is lit up at night, with the skyscrapers being the most prominent feature.
 
+![Original Image](examples/parrots.png)
+
+**Prompt:** `describe`
+
+**Output:**
+>Two vibrant parrots, a parrot with a yellow breast and a parrot with a red breast, stand side by side in a lush forest. Their colorful plumage and contrasting eyes create a captivating scene. The parrots' wings flutter with vibrant green feathers, while their beaks are adorned with black and white contrasting patches. The forest backdrop provides a serene setting for these feathered creatures, their heads bobbing in rhythm with the breeze.
+---
+
+![Original Image](examples/lake.jpg)
+
+**Prompt:** `describe`
+
+**Output:**
+>A wooden pier extends gracefully into a tranquil body of water, its surface reflecting the cloudy sky above. The pier is adorned with a post and a thin metal post, while the water mirrors the sky in its stillness. The water is calm and blue, mirroring the clear blue sky above the land, which is shrouded in clouds. The pier is a long brown wooden walkway over the water, connecting it to a distant shore. The water between the pier and the shore is calm and flat, creating a serene atmosphere.
 ---
 
 ### 🎯 Object Detection with Visualization
@@ -37,13 +51,23 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 **Prompt:** `detect car`
 
 **Detection Result:**
-- **Object Found:** `car`
-- **Bounding Box:** `<loc0246><loc0229><loc0872><loc0904>`
-- **Confidence:** High
+- **Output:** `<loc0246><loc0229><loc0872><loc0904> car<eos>`
 
 **Visualization:**
 ![Detection Result](examples/detection_car_1756339466.jpg)
 *The detected car is highlighted with a colored bounding box*
+
+**Input Image:**
+![Original Image](examples/parrots.png)
+
+**Prompt:** `detect yellow breast parrot`
+
+**Detection Result:**
+- **Output:** `<loc0354><loc0086><loc1023><loc0533> yellow breast parrot<eos>`
+
+**Visualization:**
+![Detection Result](examples/detection_parrots_1756340105.jpg)
+*The detected parrot is highlighted with a colored bounding box*
 
 ---
 
