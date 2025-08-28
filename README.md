@@ -18,22 +18,17 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 ## 📸 Demo
 
 ### Image Description
-```bash
-python paligemma.py describe examples/car.png
-# Output: In this image I can see a red color car on the road. In the background, I can see the trees.
-```
 
+![PaliGemma2 - City](examples/city.jpg)
+Prompt: Describe this image
+Output: 
+> A city skyline with a bridge over a river. The city is situated by the river, with the bridge connecting the city to a distant island. The sky is clear and blue, with a few white clouds. The bridge is long and red, with orange lights. There are boats on the river, and a large body of water lies behind the bridge. The city is lit up at night, with the skyscrapers being the most prominent feature. The bridge is tall and red, with a long metal beam supporting it. There is a boat docked on the river, and the docks are on the edge of the water.
 ### Object Detection
-```bash
-python paligemma.py detect examples/car.png car
-# Shows image with detected car highlighted
-```
-
+![PaliGemma2 - Car](examples/detected_car.png)
+Prompt: Detect car
+Output: Decoded output: <loc0246><loc0229><loc0872><loc0904> car<eos>
+![PaliGemma2 - Car](examples/detection_car.jpg)
 ### Interactive Mode
-```bash
-python inference.py
-# Enter interactive mode for real-time conversation
-```
 
 ## 🛠️ Installation
 
@@ -146,7 +141,7 @@ PaliGemma-Vision-Language-Model/
 
 | Device | Tokens/sec | Memory Usage |
 |--------|------------|--------------|
-| Apple M4 Pro | ~4-6 | 8GB RAM |
+| Apple M4 Pro | ~4-6 | 20GB RAM |
 
 
 *Benchmarked on PaliGemma2-3B model with 224px images*

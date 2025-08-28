@@ -64,6 +64,8 @@ def display_detection(decoded, image_file_path):
     cv2.destroyAllWindows()
 
     # Save the image
-    cv2.imwrite(f"{PROJECT_ROOT}/examples/output_image_{time.time()}.jpg", image)
-    print(f"Image saved to {PROJECT_ROOT}/examples/output_image_{time.time()}.jpg")
-
+    original_name = Path(image_file_path).stem
+    output_filename = f"detection_{original_name}_{time.time():.0f}.jpg"
+    output_path = PROJECT_ROOT.parent / "examples" / output_filename
+    cv2.imwrite(str(output_path), image)
+    print(f"Image saved to {output_path}")

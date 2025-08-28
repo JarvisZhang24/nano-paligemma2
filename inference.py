@@ -143,7 +143,7 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(description="Simple PaliGemma Inference")
-    parser.add_argument("--image", "-i", type=str, default="examples/car.png", help="Image path")
+    parser.add_argument("--image", "-i", type=str, default="examples/parrots.png", help="Image path")
     parser.add_argument("--prompt", "-p", type=str, help="Prompt (if not provided, enters interactive mode)")
     parser.add_argument("--model", "-m", type=str, default="paligemma2-3b-mix-224", help="Model path")
     parser.add_argument("--max-tokens", type=int, default=1024, help="Max tokens to generate")
