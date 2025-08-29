@@ -157,27 +157,43 @@ A simplified and efficient implementation of Google's PaliGemma vision-language 
 
 ### 💬 Interactive Mode
 
-Start an interactive session for real-time image analysis:
+Experience real-time image analysis with a user-friendly interactive interface:
 
 ```bash
 python inference.py
 
-# Example session:
->>> /image examples/tiger.jpg
->>> describe
-[Output] In this image we can see a tiger...
+Initializing PaliGemma 2 Vision Language Model...
+Loading model from: paligemma2-3b-mix-224
+Using device: mps
 
->>> detect tiger  
-[Detection] Showing detection results...
+=== Interactive Mode ===
+Commands:
+  exit                    - Quit the program
+  /image <path>           - Change image
+  /temperature <value>   - Set temperature (0.1-2.0)
+  /top_p <value>         - Set top_p (0.1-1.0)
+  /help                  - Show this help
+  describe               - Describe the current image
+  detect <object>        - Detect objects in image
+
+=== Current Settings ===
+Image: examples/parrots.png
+Temperature: 0.8
+Top_p: 0.9
+
+>>> describe
+[Prompt] describe
+[Output] Two colorful parrots stand side-by-side, their vibrant plumage on full display. One parrot boasts a yellow neck and a blue back, while the other features a red and green wing and a black and white beak...
+[Stats] 117 tokens in 18.58s (6.3 tokens/s)
+
 >>> exit
 ```
 
-**Available Commands:**
-- `describe` - Generate image description
-- `detect <object>` - Find and highlight objects
-- `/image <path>` - Switch to different image
-- `/temperature <value>` - Adjust creativity (0.1-2.0)
-- `/help` - Show all commands
+**Key Features:**
+- 🚀 **Real-time Performance Stats** - See generation speed and token counts
+- ⚙️ **Live Settings Display** - Current image, temperature, and sampling parameters
+- 🎯 **Intuitive Commands** - Simple commands for all operations
+- 📊 **Generation Monitoring** - Track prompt, output, and performance metrics
 
 ## 🛠️ Installation
 
@@ -234,12 +250,33 @@ python paligemma.py -i path/to/image.jpg -p "your custom prompt"
 ```bash
 python inference.py
 
-# Available commands in interactive mode:
-# /image <path>        - Change current image
-# /temperature <val>   - Adjust generation temperature  
-# /top_p <val>         - Adjust top-p sampling
-# /help                - Show help
-# exit                 - Quit
+=== Interactive Mode ===
+Commands:
+  exit                    - Quit the program
+  /image <path>           - Change image
+  /temperature <value>   - Set temperature (0.1-2.0)
+  /top_p <value>         - Set top_p (0.1-1.0)
+  /help                  - Show this help
+  describe               - Describe the current image
+  detect <object>        - Detect objects in image
+
+=== Current Settings ===
+Image: examples/parrots.png
+Temperature: 0.8
+Top_p: 0.9
+
+>>> describe
+[Prompt] describe
+[Output] Generated description with rich details...
+[Stats] Token count and generation speed displayed
+
+>>> /image examples/car.png
+>>> detect car
+[Prompt] detect car
+[Output] <loc0246><loc0229><loc0872><loc0904> car<eos>
+[Stats] Performance metrics shown
+
+>>> exit
 ```
 
 ### Python API

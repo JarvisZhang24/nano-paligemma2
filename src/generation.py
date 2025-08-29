@@ -1,8 +1,5 @@
 import torch
 
-################################### Sampling Methods ###################################
-
-
 # Top-p sampling
 def sample_top_p(probs: torch.Tensor, p: float):
     # (B, vocab_size)

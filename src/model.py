@@ -12,8 +12,6 @@ from src.projector import MultiModalProjector
 from src.merge import merge_input_ids_with_image_features
 
 
-################################### PaliGemma 2 Model ###################################
-
 
 class PaliGemma2(nn.Module):
     def __init__(self, config: PaliGemma2Config):
