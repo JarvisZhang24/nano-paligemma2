@@ -91,23 +91,23 @@
 <td width="33%">
 
 **Input**
-![Car](examples/car.png)
+![Home](examples/home.jpg)
 *Original Image*
 
 </td>
 <td width="33%">
 
 **Detection**
-`detect car`
+`detect window`
 
 **Result:**
-`<loc0246><loc0229><loc0872><loc0904> car<eos>`
+`<loc0202><loc0236><loc0284><loc0302> window ; <loc0257><loc0431><loc0331><loc0559> window ; <loc0313><loc0686><loc0392><loc0775> window ; <loc0312><loc0790><loc0411><loc0868> window ; <loc0463><loc0719><loc0569><loc0847> window ; <loc0470><loc0441><loc0585><loc0590> window ; <loc0449><loc0303><loc0515><loc0393> window ; <loc0602><loc0740><loc0684><loc0878> window ; <loc0453><loc0040><loc0608><loc0126> window<eos>`
 
 </td>
 <td width="33%">
 
 **Output**
-![Detection](examples/detection_car_1756339466.jpg)
+![Detection](examples/detection_home_1756586347.jpg)
 *Detected with bounding box*
 
 </td>
