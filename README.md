@@ -2,10 +2,10 @@
 
 **An optimized, production-ready implementation of Google's PaliGemma 2 (3B parameters) vision-language model with custom inference pipeline and performance enhancements.**
 
-![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
+![Python](https://img.shields.io/badge/python-v3.12+-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-v2.0+-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Model](https://img.shields.io/badge/Model-PaliGemma2--3B-purple.svg)
+![Model](https://img.shields.io/badge/Model-PaliGemma2--3B-224x224-purple.svg)
 ![Status](https://img.shields.io/badge/Status-Production_Ready-success.svg)
 
 ## 🎯 Key Achievements & Technical Highlights
@@ -208,7 +208,7 @@ Top_p: 0.9
 ## 🛠️ Installation
 
 ### Prerequisites
-- Python 3.8+
+- Python 3.12+
 - CUDA-compatible GPU (optional, but recommended)
 - 8GB+ RAM
 
@@ -219,8 +219,8 @@ git clone https://github.com/jarviszhang24/nano-paligemma2.git
 cd nano-paligemma2
 
 # Create conda environment
-conda create -n paligemma python=3.9
-conda activate paligemma
+conda create -n paligemma2 python=3.12
+conda activate paligemma2
 
 # Install dependencies
 pip install -r requirements.txt
@@ -369,9 +369,6 @@ PaliGemma-Vision-Language-Model/
 | Device | Model | Tokens/sec | Memory Usage | Latency (First Token) |
 |--------|-------|------------|--------------|----------------------|
 | Apple M4 Pro | PaliGemma2-3B | 6.3 | 20GB RAM | ~2.1s |
-| NVIDIA RTX 4090 | PaliGemma2-3B | ~15-20* | 8GB VRAM | ~0.8s* |
-| CPU (Intel i9) | PaliGemma2-3B | ~1-2* | 32GB RAM | ~5s* |
-
 *Estimated based on architecture
 
 ### Key Optimizations Implemented

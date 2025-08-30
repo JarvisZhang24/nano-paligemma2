@@ -14,7 +14,7 @@ from PIL import Image
 import numpy as np
 
 def setup_logging(level: str = 'INFO', log_file: Optional[str] = None):
-    """设置日志系统"""
+    """Setup logging system"""
     log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     
     handlers = [logging.StreamHandler(sys.stdout)]
@@ -30,12 +30,12 @@ def setup_logging(level: str = 'INFO', log_file: Optional[str] = None):
     return logging.getLogger('PaliGemma')
 
 def get_device(force_cpu: bool = False) -> str:
-    """智能选择计算设备"""
+    """Smartly select the device for inference"""
     if force_cpu:
         return 'cpu'
     
     if torch.cuda.is_available():
-        # 检查CUDA内存
+        # Check CUDA memory
         gpu_memory = torch.cuda.get_device_properties(0).total_memory / 1e9
         logging.info(f"CUDA device found with {gpu_memory:.1f}GB memory")
         return 'cuda'
@@ -47,7 +47,7 @@ def get_device(force_cpu: bool = False) -> str:
         return 'cpu'
 
 def validate_image(image_path: str) -> Tuple[bool, str]:
-    """验证图像文件"""
+    """Validate image file"""
     path = Path(image_path)
     
     if not path.exists():
@@ -56,12 +56,12 @@ def validate_image(image_path: str) -> Tuple[bool, str]:
     if not path.is_file():
         return False, f"Not a file: {image_path}"
     
-    # 检查文件扩展名
+    # Check file extension
     valid_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff'}
     if path.suffix.lower() not in valid_extensions:
         return False, f"Unsupported image format: {path.suffix}"
     
-    # 尝试打开图像
+    # Try to open the image
     try:
         with Image.open(image_path) as img:
             img.verify()
@@ -70,7 +70,7 @@ def validate_image(image_path: str) -> Tuple[bool, str]:
         return False, f"Cannot open image: {str(e)}"
 
 def load_json_config(config_path: str) -> Dict[str, Any]:
-    """加载JSON配置文件"""
+    """Load JSON configuration file"""
     try:
         with open(config_path, 'r') as f:
             return json.load(f)
@@ -82,7 +82,7 @@ def load_json_config(config_path: str) -> Dict[str, Any]:
         return {}
 
 def save_json_config(config: Dict[str, Any], config_path: str):
-    """保存配置到JSON文件"""
+    """Save configuration to JSON file"""
     path = Path(config_path)
     path.parent.mkdir(parents=True, exist_ok=True)
     
@@ -92,7 +92,7 @@ def save_json_config(config: Dict[str, Any], config_path: str):
     logging.info(f"Configuration saved to {config_path}")
 
 def format_time(seconds: float) -> str:
-    """格式化时间显示"""
+    """Format time display"""
     if seconds < 60:
         return f"{seconds:.1f}s"
     elif seconds < 3600:
@@ -105,13 +105,13 @@ def format_time(seconds: float) -> str:
         return f"{hours}h {minutes}m"
 
 def calculate_tokens_per_second(tokens: int, elapsed_time: float) -> float:
-    """计算生成速度"""
+    """Calculate generation speed"""
     if elapsed_time > 0:
         return tokens / elapsed_time
     return 0.0
 
 def memory_usage() -> Dict[str, float]:
-    """获取内存使用情况"""
+    """Get memory usage"""
     import psutil
     
     process = psutil.Process()
@@ -129,7 +129,7 @@ def memory_usage() -> Dict[str, float]:
     return info
 
 def print_memory_usage():
-    """打印内存使用情况"""
+    """Print memory usage"""
     usage = memory_usage()
     print("\nMemory Usage:")
     print(f"  System RAM: {usage['rss_gb']:.2f} GB")
@@ -138,7 +138,7 @@ def print_memory_usage():
               f"{usage['gpu_reserved_gb']:.2f} GB reserved")
 
 class Timer:
-    """计时器上下文管理器"""
+    """Timer context manager"""
     
     def __init__(self, name: str = "Operation", verbose: bool = True):
         self.name = name
@@ -158,7 +158,7 @@ class Timer:
             print(f"[{self.name}] Completed in {format_time(self.elapsed)}")
 
 class ProgressTracker:
-    """进度跟踪器"""
+    """ Progress tracker"""
     
     def __init__(self, total: int, description: str = "Processing"):
         self.total = total
@@ -167,23 +167,23 @@ class ProgressTracker:
         self.start_time = time.time()
     
     def update(self, n: int = 1):
-        """更新进度"""
+        """Update progress"""
         self.current += n
         self._display()
     
     def _display(self):
-        """显示进度条"""
+        """Display progress bar"""
         percent = self.current / self.total * 100
         elapsed = time.time() - self.start_time
         
-        # 估算剩余时间
+        # Estimate remaining time
         if self.current > 0:
             eta = elapsed * (self.total - self.current) / self.current
             eta_str = format_time(eta)
         else:
             eta_str = "N/A"
         
-        # 进度条
+        # Display progress bar
         bar_length = 30
         filled = int(bar_length * self.current / self.total)
         bar = '█' * filled + '░' * (bar_length - filled)
@@ -192,7 +192,7 @@ class ProgressTracker:
               end='', flush=True)
         
         if self.current >= self.total:
-            print()  # 换行
+            print()  # Newline
 
 def resize_image_aspect_ratio(
     image: Image.Image, 
@@ -200,25 +200,25 @@ def resize_image_aspect_ratio(
     method: str = 'pad'
 ) -> Image.Image:
     """
-    调整图像大小，保持纵横比
+    Resize image while maintaining aspect ratio
     
     Args:
-        image: 输入图像
-        target_size: 目标大小 (width, height)
-        method: 'pad' (填充) 或 'crop' (裁剪)
+        image: Input image
+        target_size: Target size (width, height)
+        method: 'pad' (padding) or 'crop' (cropping)
     """
     target_width, target_height = target_size
     
     if method == 'pad':
-        # 计算缩放比例
+        # Calculate scale
         scale = min(target_width / image.width, target_height / image.height)
         new_width = int(image.width * scale)
         new_height = int(image.height * scale)
         
-        # 调整大小
+        # Resize
         resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
         
-        # 创建新图像并居中粘贴
+        # Create new image and paste centered
         new_image = Image.new('RGB', target_size, (0, 0, 0))
         paste_x = (target_width - new_width) // 2
         paste_y = (target_height - new_height) // 2
@@ -227,15 +227,15 @@ def resize_image_aspect_ratio(
         return new_image
     
     elif method == 'crop':
-        # 计算缩放比例
+        # Calculate scale
         scale = max(target_width / image.width, target_height / image.height)
         new_width = int(image.width * scale)
         new_height = int(image.height * scale)
         
-        # 调整大小
+        # Resize
         resized = image.resize((new_width, new_height), Image.Resampling.LANCZOS)
         
-        # 中心裁剪
+        # Center crop
         left = (new_width - target_width) // 2
         top = (new_height - target_height) // 2
         right = left + target_width
@@ -253,12 +253,12 @@ def batch_process_images(
     show_progress: bool = True
 ) -> List[Any]:
     """
-    批量处理图像
+    Batch process images
     
     Args:
-        image_paths: 图像路径列表
-        process_fn: 处理函数
-        batch_size: 批次大小
+        image_paths: List of image paths
+        process_fn: Processing function
+        batch_size: Batch size
         show_progress: 是否显示进度
     """
     results = []
@@ -288,8 +288,8 @@ def batch_process_images(
 
 def merge_configs(*configs: Dict[str, Any]) -> Dict[str, Any]:
     """
-    合并多个配置字典
-    后面的配置会覆盖前面的
+    Merge multiple configuration dictionaries
+    The later configuration will override the previous one
     """
     result = {}
     for config in configs:
@@ -299,7 +299,7 @@ def merge_configs(*configs: Dict[str, Any]) -> Dict[str, Any]:
 
 def validate_config(config: Dict[str, Any], schema: Dict[str, Any]) -> Tuple[bool, List[str]]:
     """
-    验证配置是否符合schema
+    Validate configuration against schema
     
     Returns:
         (is_valid, error_messages)
