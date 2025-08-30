@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/python-v3.12+-blue.svg)
 ![PyTorch](https://img.shields.io/badge/PyTorch-v2.0+-red.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Model](https://img.shields.io/badge/Model-PaliGemma2--3B-224x224-purple.svg)
+![Model](https://img.shields.io/badge/Model-PaliGemma2--3B-purple.svg)
 ![Status](https://img.shields.io/badge/Status-Production_Ready-success.svg)
 
 ## 🎯 Key Achievements & Technical Highlights
