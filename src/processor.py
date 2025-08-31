@@ -2,6 +2,7 @@ import torch
 import numpy as np
 from PIL import Image
 from typing import Dict, List, Optional, Tuple, Iterable, Union
+import torchvision.transforms as T
 
 
 ################################### Constants ###################################
@@ -13,67 +14,32 @@ IMAGENET_STANDARD_STD = [0.5, 0.5, 0.5]  # From HF code
 
 
 def add_image_tokens_to_prompt(prefix_prompt, bos_token, image_seq_len, image_token):
-    #   The input text is tokenized normally.
-    #   A <bos> token is added at the beginning, and an additional newline token (\n) is appended.
-    #   This newline token is an essential part of the input prompt the model was trained with, so adding it explicitly ensures it's always there.
-    #   The tokenized text is also prefixed with a fixed number of <image> tokens.
-    #   Unlike in the PaliGemma paper, the Hugging Face code doesn't tokenize \n separately.
+    # The input text is tokenized normally.
+    # A <bos> token is added at the beginning, and an additional newline token (\n) is appended.
+    # This newline token is an essential part of the input prompt the model was trained with, so adding it explicitly ensures it's always there.
+    # The tokenized text is also prefixed with a fixed number of <image> tokens.
+    # Unlike in the PaliGemma paper, the Hugging Face code doesn't tokenize \n separately.
     return f"{image_token * image_seq_len}{bos_token}{prefix_prompt}\n"
 
 
-def rescale(
-    image: np.ndarray, scale: float, dtype: np.dtype = np.float32
-) -> np.ndarray:
-    rescaled_image = image * scale
-    rescaled_image = rescaled_image.astype(dtype)
-    return rescaled_image
-
-
-def resize(
-    image: Image,
-    size: Tuple[int, int],
-    resample: Image.Resampling = None,
-    reducing_gap: Optional[int] = None,
-) -> np.ndarray:
-    height, width = size
-    resized_image = image.resize(
-        (width, height), resample=resample, reducing_gap=reducing_gap
-    )
-    return resized_image
-
-
-def normalize(
-    image: np.ndarray,
-    mean: Union[float, Iterable[float]],
-    std: Union[float, Iterable[float]],
-) -> np.ndarray:
-    mean = np.array(mean, dtype=image.dtype)
-    std = np.array(std, dtype=image.dtype)
-    image = (image - mean) / std
-    return image
-
-
-def process_images(
-    images: List[Image.Image],
-    size: Dict[str, int] = None,
-    resample: Image.Resampling = None,
-    rescale_factor: float = None,
-    image_mean: Optional[Union[float, List[float]]] = None,
-    image_std: Optional[Union[float, List[float]]] = None,
-) -> List[np.ndarray]:
-    height, width = size[0], size[1]
-    images = [
-        resize(image=image, size=(height, width), resample=resample) for image in images
-    ]
-    images = [np.array(image) for image in images]
-    # Rescale the pixel values to be in the range [0, 1]
-    images = [rescale(image, scale=rescale_factor) for image in images]
-    # Normalize the images to have mean 0 and standard deviation 1
-    images = [normalize(image, mean=image_mean, std=image_std) for image in images]
-    # Move the channel dimension to the first dimension as the model expects images in the format [Channel, Height, Width]
-    images = [image.transpose(2, 0, 1) for image in images]
-
-    return images
+def preprocess_single_image(image, size=(224, 224), mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]):
+    # Support PIL.Image or str(path)
+    if isinstance(image, str):
+        image = Image.open(image).convert('RGB')
+    elif isinstance(image, np.ndarray):
+        image = Image.fromarray(image).convert('RGB')
+    elif not isinstance(image, Image.Image):
+        raise ValueError("Unsupported image type")
+    
+    # Resize
+    transform = T.Compose([
+        T.Resize(size, antialias=True),
+        T.ToTensor(),  # [C, H, W] Tensor
+        T.Normalize(mean=mean, std=std)
+    ])
+    image_tensor = transform(image).unsqueeze(0)  # [1, 3, H, W]
+    
+    return image_tensor
 
 
 ################################### PaliGemma Processor ###################################
@@ -106,26 +72,17 @@ class PaliGemmaProcessor:
     def __call__(
         self,
         text: List[str],
-        images: List[Image.Image],
+        image: Image.Image,
         padding: str = "longest",
         truncation: bool = False,
     ) -> dict:
-        assert (
-            len(images) == 1 and len(text) == 1
-        ), f"Received {len(images)} images for {len(text)} prompts."  # We only support one image and one prompt at a time.
 
-        # We preprocess the images
-        pixel_values = process_images(
-            images,
+        pixel_values = preprocess_single_image(
+            image,
             size=(self.image_size, self.image_size),
-            resample=Image.Resampling.BICUBIC,
-            rescale_factor=1 / 255.0,
-            image_mean=IMAGENET_STANDARD_MEAN,
-            image_std=IMAGENET_STANDARD_STD,
+            mean=IMAGENET_STANDARD_MEAN,
+            std=IMAGENET_STANDARD_STD,
         )
-
-        pixel_values = np.stack(pixel_values, axis=0)
-        pixel_values = torch.tensor(pixel_values)
 
         # The image tokens act as placeholders and will be later replaced by the image embeddings.
         input_strings = [
