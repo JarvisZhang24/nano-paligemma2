@@ -10,6 +10,7 @@ import time
 import sys
 from pathlib import Path
 
+
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent
 sys.path.append(str(PROJECT_ROOT))
@@ -21,7 +22,7 @@ from src.detection import display_detection
 
 def load_model(model_path="paligemma2-3b-mix-224", device="auto"):
     """Load model"""
-    from scripts.download_weights import load_weights
+    from scripts.load_weights import load_weights
     
     # Auto select device
     if device == "auto":
