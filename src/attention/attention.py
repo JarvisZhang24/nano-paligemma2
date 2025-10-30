@@ -5,6 +5,7 @@ import math
 from src.text.gemma2_config import Gemma2Config
 from src.kv_cache import KVCache
 from src.attention.rotary import RotaryEmbedding
+import torch.nn.functional as F
 
 ################################### Useful functions ###################################
 
@@ -43,7 +44,6 @@ class Gemma2GQA(nn.Module):
 
         # Specific to Gemma2
         self.sliding_window_size = config.sliding_window_size
-        self.attn_logit_softcapping = config.attn_logit_softcapping
         self.attn_logit_softcapping = config.attn_logit_softcapping
         self.attn_types = config.attn_types
 
@@ -121,39 +121,57 @@ class Gemma2GQA(nn.Module):
         key = self.repeat_kv(key, self.num_key_value_groups)
         value = self.repeat_kv(value, self.num_key_value_groups)
 
-        attn_weights = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(
-            self.head_dim
-        )
+        # Prepare attention mask for scaled_dot_product_attention
+        if attention_mask is not None:
+            # Convert attention_mask to boolean mask (True = attend, False = mask out)
+            # Original mask uses large negative values for masking
+            bool_mask = attention_mask > -1e4
+            
+            # Handle sliding window attention
+            if (
+                self.attn_types[self.layer_idx] == "local_sliding"
+                and self.sliding_window_size is not None
+            ):
+                batch_size, seq_len = bool_mask.shape[-2:]
+                # Create sliding window mask
+                sliding_mask = torch.ones((seq_len, seq_len), device=bool_mask.device, dtype=torch.bool)
+                sliding_mask = torch.triu(sliding_mask, -self.sliding_window_size + 1) & \
+                              torch.tril(sliding_mask, self.sliding_window_size - 1)
+                # Apply sliding window to existing mask
+                bool_mask = bool_mask & sliding_mask.unsqueeze(0).unsqueeze(0)
+        else:
+            bool_mask = None
 
-        # Alternate between global attention and sliding window mask.
-        if (
-            self.attn_types[self.layer_idx] == "local_sliding"
-            and self.sliding_window_size is not None
-        ):
-            all_ones = torch.ones_like(attention_mask)
-            sliding_mask = torch.triu(
-                all_ones, -1 * self.sliding_window_size + 1
-            ) * torch.tril(all_ones, self.sliding_window_size - 1)
-            attention_mask = torch.where(
-                sliding_mask == 1, attention_mask, -2.3819763e38
-            )
-
-        # Apply softcapping to the attention logits
+        # Handle Gemma2's attention logit softcapping
         if self.attn_logit_softcapping is not None:
+            # For softcapping, we need to do it manually since SDPA doesn't support it
+            attn_weights = torch.matmul(query, key.transpose(-2, -1)) / math.sqrt(self.head_dim)
+            
+            # Apply softcapping
             attn_weights = attn_weights / self.attn_logit_softcapping
             attn_weights = torch.tanh(attn_weights)
             attn_weights = attn_weights * self.attn_logit_softcapping
-
-        attn_weights = attn_weights + attention_mask
-
-        attn_weights = nn.functional.softmax(
-            attn_weights, dim=-1, dtype=torch.float32
-        ).to(query.dtype)
-        attn_weights = nn.functional.dropout(
-            attn_weights, p=self.attention_dropout, training=self.training
-        )
-
-        attn_output = torch.matmul(attn_weights, value)
+            
+            # Apply mask manually
+            if attention_mask is not None:
+                attn_weights = attn_weights + attention_mask
+            
+            attn_weights = F.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query.dtype)
+            attn_weights = F.dropout(attn_weights, p=self.attention_dropout, training=self.training)
+            attn_output = torch.matmul(attn_weights, value)
+        else:
+            # Use optimized scaled_dot_product_attention when no softcapping
+            attn_output = F.scaled_dot_product_attention(
+                query=query,
+                key=key,
+                value=value,
+                attn_mask=bool_mask,
+                dropout_p=self.attention_dropout if self.training else 0.0,
+                is_causal=self.is_causal if bool_mask is None else False,  # Don't use is_causal with custom mask
+                scale=1.0 / math.sqrt(self.head_dim)
+            )
+            # Note: We can't easily extract attention weights from SDPA, so set to None
+            attn_weights = None
 
         # Reshape and project output
         attn_output = attn_output.transpose(1, 2).contiguous()

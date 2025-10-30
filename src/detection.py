@@ -59,9 +59,16 @@ def display_detection(decoded, image_file_path):
             color,
             2,
         )
-    cv2.imshow("image", image)
-    cv2.waitKey(0)  # Wait for any key to close the window
-    cv2.destroyAllWindows()
+    # Try to display image, skip if no GUI available (e.g., on servers)
+    try:
+        cv2.imshow("image", image)
+        cv2.waitKey(0)  # Wait for any key to close the window
+        cv2.destroyAllWindows()
+        print("Image displayed successfully")
+    except cv2.error as e:
+        print(f"Cannot display image (no GUI available): {e}")
+    except Exception as e:
+        print(f"Display failed: {e}")
 
     # Save the image
     original_name = Path(image_file_path).stem

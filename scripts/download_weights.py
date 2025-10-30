@@ -15,7 +15,7 @@ Step 2. Run this script to download the model to ./paligemma2-3b-pt-224
 """
 
 PROJECT_ROOT = Path(__file__).parent
-MODEL_DIR = PROJECT_ROOT.parent / "paligemma2-3b-mix-224"
+MODEL_DIR = PROJECT_ROOT.parent / "paligemma2-3b-mix-448"
 sys.path.append(str(PROJECT_ROOT))
 
 # # Load environment variables from .env file
@@ -25,7 +25,7 @@ HF_token = os.getenv("HF_TOKEN")
 login(token=HF_token)
 # download the model
 snapshot_download(
-    repo_id="google/paligemma2-3b-mix-224",
+    repo_id="google/paligemma2-3b-mix-448",
     local_dir=str(MODEL_DIR),
     local_dir_use_symlinks=False 
 )

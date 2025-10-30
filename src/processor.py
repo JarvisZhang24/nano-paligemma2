@@ -71,7 +71,7 @@ class PaliGemmaProcessor:
 
     def __call__(
         self,
-        text: List[str],
+        text: str,
         image: Image.Image,
         padding: str = "longest",
         truncation: bool = False,
@@ -85,21 +85,19 @@ class PaliGemmaProcessor:
         )
 
         # The image tokens act as placeholders and will be later replaced by the image embeddings.
-        input_strings = [
-            add_image_tokens_to_prompt(
-                prefix_prompt=prompt,
-                bos_token=self.tokenizer.bos_token,
-                image_seq_len=self.image_seq_length,
-                image_token=self.IMAGE_TOKEN,
-            )
-            for prompt in text
-        ]
+        input_string = add_image_tokens_to_prompt(
+            prefix_prompt=text,
+            bos_token=self.tokenizer.bos_token,
+            image_seq_len=self.image_seq_length,
+            image_token=self.IMAGE_TOKEN,
+        )
+        
 
         # Returns the input_ids and attention_mask as PyTorch tensors
         # The attention mask is only 1s as we don't use padding
         # The model has been trained with a maximum sequence length of 128
         inputs = self.tokenizer(
-            input_strings,
+            input_string,
             return_tensors="pt",
             padding=padding,
             truncation=truncation,

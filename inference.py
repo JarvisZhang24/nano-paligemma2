@@ -69,7 +69,7 @@ class SimpleInference:
         image = Image.open(image_path)
         
         # Prepare input
-        model_inputs = self.processor(text=[prompt], image=image)
+        model_inputs = self.processor(text=prompt, image=image)
         model_inputs = {k: v.to(self.device) for k, v in model_inputs.items()}
         
         input_ids = model_inputs["input_ids"]

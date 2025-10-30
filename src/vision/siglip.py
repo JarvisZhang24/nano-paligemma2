@@ -33,6 +33,7 @@ class SiglipVisionEmbeddings(nn.Module):
 
     def forward(self, pixel_values):
         patch_embeds = self.patch_embedding(
+            # (batch_size, num_channels, image_size, image_size)
             pixel_values
         )  # (batch_size, embed_dim, num_patches_h, num_patches_w) | Also: num_patches_h * num_patches_w = num_patches
         embeddings = patch_embeds.flatten(2)  # (batch_size, embed_dim, num_patches)
